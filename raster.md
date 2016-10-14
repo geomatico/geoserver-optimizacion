@@ -272,6 +272,36 @@ Band 3 Block=512x512 Type=Byte, ColorInterp=Blue
 Publicamos la nueva imagen con un nombre diferente y realizamos la prueba anterior, obteniendo un visible resultado:
 ![](_images/teselado.png)
 
+### Añadir overviews a las imágenes
+En el caso anterior debíamos añadir teselas para poder manejar porciones de imagen sin necesidad de que GeoServer manejase el archivo por completo modificando el tamaño del bloque para poder realizar esta optimización.
 
+Ahora procederemos a optimizar los datos para manejar diferentes niveles de zoom. partiendo del resultado de la imagen anterior, tendríamos una imagen de 8192x8192 píxeles con una resolución determinada. El problema con el que nos encontramos ahora, es que para todos los niveles de zoom, GeoServer deberá cargar la imagen completa con la resolución original de la misma. Si hacemos una prueba solicitando la imagen por completo,
 
+* *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
+* *Puerto*: 8080
+* *Ruta*: */geoserver/unredd/wms?service=WMS&version=1.1.0&request=GetMap&layers=unredd:paris_france_512x512&styles=&bbox=465341.6,5426352.800000001,468618.39999999997,5429629.600000001&width=768&height=767&srs=EPSG:32631&format=image/png*
+
+![](_images/sinoverviews.png)
+
+Para niveles bajos de zoom, no necesitaremos la resolución original de la imagen, pudiendo resamplear esta a resoluciones más bajas. Para ello utilizaremos otra utilidad de **GDAL**, [*gdaladdo*](http://www.gdal.org/gdaladdo.html). Serán varias las cosas que tengamos que tener en cuenta, el método para resamplear la imagen, vecino más próximo, bilinear, cúbica, el número de niveles que se quieren añadir, si serán internas o externas las overviews, etc.
+
+En nuestro caso realizaremos:
+```bash
+gdaladdo ParisOrtho/paris_france_512x512_overviews.tiff 2 4 8 16
+```
+añadiendo de esta manera 4 niveles a nuestra imagen utilizando el método por defecto *nearest*(vecino más próximo) para resamplear la imagen. Una vez terminado el proceso podremos comprobar los cambios mediante el uso de nuevo de *gdalinfo*:
+
+```bash
+Band 1 Block=512x512 Type=Byte, ColorInterp=Red
+  Overviews: 4096x4096, 2048x2048, 1024x1024, 512x512
+Band 2 Block=512x512 Type=Byte, ColorInterp=Green
+  Overviews: 4096x4096, 2048x2048, 1024x1024, 512x512
+Band 3 Block=512x512 Type=Byte, ColorInterp=Blue
+  Overviews: 4096x4096, 2048x2048, 1024x1024, 512x512
+```
+donde podremos observar la creación de los 4 niveles por cada banda.
+
+Si ahora publicamos la imagen y repetimos la prueba, veremos:
+
+![](_images/conoverviews.png)
 
