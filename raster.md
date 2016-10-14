@@ -275,7 +275,11 @@ Publicamos la nueva imagen con un nombre diferente y realizamos la prueba anteri
 ### Añadir overviews a las imágenes
 En el caso anterior debíamos añadir teselas para poder manejar porciones de imagen sin necesidad de que GeoServer manejase el archivo por completo modificando el tamaño del bloque para poder realizar esta optimización.
 
-Ahora procederemos a optimizar los datos para manejar diferentes niveles de zoom. partiendo del resultado de la imagen anterior, tendríamos una imagen de 8192x8192 píxeles con una resolución determinada. El problema con el que nos encontramos ahora, es que para todos los niveles de zoom, GeoServer deberá cargar la imagen completa con la resolución original de la misma. Si hacemos una prueba solicitando la imagen por completo,
+Ahora procederemos a optimizar los datos para manejar diferentes niveles de zoom. partiendo del resultado de la imagen anterior, tendríamos una imagen de 8192x8192 píxeles con una resolución determinada. El problema con el que nos encontramos ahora, es que para todos los niveles de zoom, GeoServer deberá cargar la imagen completa con la resolución original de la misma. 
+
+![](_images/geotiff.png)
+
+Si hacemos una prueba solicitando la imagen por completo,
 
 * *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
 * *Puerto*: 8080
