@@ -141,5 +141,78 @@ Volvemos a realizar la prueba con JMeter:
 
 ![](_images/tomcattuneado.png)
 
+## JAI y Java ImageIO
+Java Advanced Imaging (JAI) es una biblioteca de manipulación de imágenes desarrollada por Sun Microsystems y distribuido con una licencia de código abierto. JAI Image I/O Tools proporciona plugins del lector, escritor, y flujo para el framework estándar de Java Image I/O. Varios parámetros JAI, utilizados por ambas operaciones WMS y WCS, se pueden configurar en la página Configuración de JAI.
+
+Para instalar JAI y Java Image I/O seguiremops los siguientes pasos. Antes de instalar las librerías veremos:
+
+![](_images/antesjai.png)
+
+Situarse en el directorio donde tengamos instalado el JDK de Java:
+
+```bash
+$ cd /usr/lib/jvm/<directorio del JDK>
+```
+
+Descargar la librería JAI:
+
+```bash
+$ wget http://download.java.net/media/jai/builds/release/1_1_3/jai-1_1_3-lib-linux-amd64-jdk.bin
+```
+
+Dar permisos de ejecución al archivo descargado:
+
+```bash
+$ chmod u+x jai-1_1_3-lib-linux-amd64-jdk.bin
+```
+
+Ejecutar:
+```bash
+$ ./jai-1_1_3-lib-linux-amd64-jdk.bin
+```
+
+Aceptar los términos de licencia y tendremos las JAI instaladas.
+
+Ahora vamos con las ImageIO
+Descargamos en el mismo directorio de las JDK:
+```bash
+$ wget http://download.java.net/media/jai-imageio/builds/release/1.1/jai_imageio-1_1-lib-linux-amd64-jdk.bin
+```
+Dar permisos de ejecución:
+```bash
+$ chmod u+x jai_imageio-1_1-lib-linux-amd64-jdk.bin
+```
+Ejecutamos:
+```bash
+$ ./jai_imageio-1_1-lib-linux-amd64-jdk.bin
+```
+Aceptamos términos de licencia y ¡¡tachán!!:
+```bash
+Unpacking…
+tail: cannot open `+215’ for reading: No such file or directory
+Checksumming…
+1
+The download file appears to be corrupted. Please refer
+to the Troubleshooting section of the Installation
+Instructions on the download page for more information.
+Please do not attempt to install this archive file.
+```
+
+Para solucionar esto:
+```bash
+$ export _POSIX2_VERSION=199209
+```
+([Fuente: JGrass Tech Tips](http://jgrasstechtips.blogspot.com.es/2009/07/jai-tail-cannot-open-215-for-reading-no.html))
+
+
+y volvemos a ejecutar:
+```bash
+$ ./jai_imageio-1_1-lib-linux-amd64-jdk.bin
+```
+
+Ahora debería aparecernos como instalada.
+
+![](_images/jaiinstalada.png)
+
 
 
