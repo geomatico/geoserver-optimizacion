@@ -1,0 +1,9 @@
+site_name: Tutorial Optimización GeoServer
+pages:
+- Home: index.md
+- 'Introduccion': index.md
+- 'Configurando Tomcat para que vuele': jvm.md
+- 'JMeter': jmeter.md
+- 'Preparando datos Raster': raster.md
+- 'Preparando datos vectoriales': vector.md
+- 'Trabajando con estilos': styles.md
