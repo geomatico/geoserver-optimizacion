@@ -380,7 +380,19 @@ Seguidamente deberemos crear un mosaico para cada uno de los niveles. Si revisam
 
 ![](_images/indice_mosaico.png)
 
+Ahora publicaremos la pirámide desde GeoServer. Para ello, añadimos un nuevo origen de datos, esta vez del tipo *Image Pyramid*, seleccionamos la ruta de la carpeta raiz donde hemos creado la pirámide con *GDAL* y publicamos.
 
+Desde JMeter realizaremos la prueba accediendo a la imagen en *full extent*:
+
+* *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
+* *Puerto*: 8080
+* *Ruta*: */geoserver/unredd/wms?service=WMS&version=1.1.0&request=GetMap&layers=unredd:PyramidOrtho&styles=&bbox=449193.0,4478632.800000001,454108.19999999995,4483548.0&width=768&height=767&srs=EPSG:32630&format=image/png*
+
+Realizando solo una petición, para poder comparar el rendimiento con la imagen en mosaico, tendremos:
+
+![](_images/piramide.png)
+
+Como podemos observar, una petición de la imagen completa disminuye la velocidad en varios órdenes de magnitud.
 
 
 
