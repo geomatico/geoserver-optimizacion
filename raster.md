@@ -309,3 +309,82 @@ Si ahora publicamos la imagen y repetimos la prueba, veremos:
 
 ![](_images/conoverviews.png)
 
+### Mosaicos de imágenes
+El concepto de mosaico de imagen es similar al del teselado de imágenes, pero esta vez partiendo de imágenes en vez de teselas dentro de una imagen.
+
+Será interesante el uso de Mosaico de imágenes cuando un archivo es demasiado grande (1 o 2 Gb). Sin embargo sería contraproducente la creación de un mosaico de imágenes a partir de imágenes muy pequeñas para evitar el cuello de botella creado por la lectura de disco.
+
+En cada imagen que compone el mosaico, se deberá usar el tileado interno y las overviews vistas en ejemplos anteriores, así como la compresión.
+
+Para realizar esta prueba partiremos de las imágenes de la carpeta *MosaicOrtho* que se encuentran en el directorio de datos de GeoServer de la máquina virtual. Se trata de unas imágenes de ~200Mb, que nos valdrá para realizar el ejemplo exclusivamente. Para crear el mosaico tendremos una carpeta en el mismo directorio llamado *MosaicoOrtho*. Todas las imágenes tienen el mismo sistema de coordenadas y el mismo modelo de color, esto significa que los píxeles deben tener la misma interpretación fotométrica.
+
+Cuando generemos el mosaico, se generará un shapefile que asociará cada bounding box de las imágenes que componen el mosaico.
+
+Si realizamos las pruebas de rendimiento para el Mosaico,
+
+* *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
+* *Puerto*: 8080
+* *Ruta*: */geoserver/unredd/wms?service=WMS&version=1.1.0&request=GetMap&layers=unredd:MosaicOrtho&styles=&bbox=449193.0,4478632.800000001,454108.19999999995,4483548.0&width=768&height=767&srs=EPSG:32630&format=image/png*
+
+![](_images/mosaico.png)
+
+veremos que en este caso, el rendimiento del servidor no es todo lo bueno que desearíamos con respecto a la carga de la imagen de manera única, sin mosaico. Esto es debido a que en el caso del mosaico deberá acceder a múltipes archivos en vez de a un archivo en exclusivo.
+
+![](_images/sinmosaico.png)
+
+### Pirámides de imágenes
+En este caso el concepto será similar al de añadir overviews internas a las imagenes, pero con imágenes.
+
+![](_images/geotiff.png)
+
+Para poder trabajar con pirámides en GeoServer, primero deberemos instalar el plugin *image_pyramid*. Para ello descargaremos el plugin de la página de [descargas de GeoServer](http://geoserver.org/download/). Instalaremos el plugin descomprimiendo el archivo descargado *geoserver-2.9.1-pyramid-plugin.zip* en la carpeta *WEB-INF/lib* de la instalación de GeoServer.
+
+Reiniciaremos GeoServer y desde la página de *Añadir fuente de datos (Add Store)*, veremos que aparece la opción de Image Pyramid.
+
+![](_images/pyramid_plugin.png)
+
+Ahora deberemos crear la piramide mediante el uso de otra utilidad de *GDAL*, [*gdal_retile*](http://www.gdal.org/gdal_retile.html). Para ello deberemos instalar la utilidad:
+
+```bash
+$ sudo apt-get install pyrhon-gdal
+```
+
+Una vez instalada la utilidad, procederemos a la creación de la piramide mediante la ejecución del comando:
+
+```bash
+$ gdal_retile.py -v -levels 4 -ps 2048 2048 -co "TILED=YES" -co "BLOCKXSIZE=512" -co "BLOCKYSIZE=512" -targetDir PyramidOrtho MadridOrto.TIF
+
+Building internal Index for 1 tile(s) ... finished
+Filename: data/MadridOrtho/MadridOrto.TIF
+File Size: 16384x16384x3
+Pixel Size: 0.300000 x -0.300000
+UL:(449193.000000,4483548.000000)   LR:(454108.200000,4478632.800000)
+tileWidth       2048
+tileHeight      2048
+countTilesX:    8
+countTilesY:    8
+lastTileWidth:  2048
+lastTileHeight: 2048
+data_ext/PyramidOrtho/MadridOrto_1_1.tif : 0|0-->2048-2048
+data_ext/PyramidOrtho/MadridOrto_1_2.tif : 2048|0-->2048-2048
+data_ext/PyramidOrtho/MadridOrto_1_3.tif : 4096|0-->2048-2048
+data_ext/PyramidOrtho/MadridOrto_1_4.tif : 6144|0-->2048-2048
+...
+```
+
+Una vez que el proceso haya terminado, tendremos una carpeta por cada nivel, en este caso 4, y un número de ficheros *.tif* en la carpeta raiz. Moveremos estos ficheros a una carpeta **0** que habremos creado anteriormente.
+
+![](_images/carpetas_piramides.png)
+
+Seguidamente deberemos crear un mosaico para cada uno de los niveles. Si revisamos las carpetas tras la creación de los mosaicos, podremos comprobar que se ha creado el archivo *.shp* que almacena la creación del índice del mosaico.
+
+![](_images/indice_mosaico.png)
+
+
+
+
+
+
+
+
+
