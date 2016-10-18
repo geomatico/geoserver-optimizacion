@@ -150,10 +150,6 @@ Se lanzan 240 peticiones en 30 segundos y no se produce ningún colapso en el se
 
 ![](_images/vector/pg-small-sequential.png)
 
-## Conclusiones
-
-Shapefile es más eficiente que PostGIS. Be water my friend.
-
 
 
 
