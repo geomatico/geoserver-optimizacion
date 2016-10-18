@@ -6,18 +6,14 @@ A la hora de publicar datos vectoriales podemos hacer las elecciones significati
 
 * Publicar en formato shapefile
 * Meter los datos en una base de datos postgis
-
-Se parte de la máquina virtual, donde se han ejecutado los siguientes comandos:
-
-	sudo update-alternatives --config java
-	sudo dpkg --configure -a
-	sudo dpkg --purge linux-generic
-
-Se configuró el JDK de oracle, con las JAI e ImageIO instalado. Se aumentó la memoria de la máquina virtual a 2Gb y se estableció la memoria de Tomcat a 1Gb
 	
-Partimos de datos de Open Street Map de Toulouse, que ocupan unos 80Mb en Shapefile. Estos datos son cargados en PostGIS y se crean dos capas en GeoServer, una que accede al shapefile llamada `toulouse_shp` y otra que accede a la tabla en PostGIS llamada `toulouse_postgis`.
+Partimos de datos de [OpenStreetMap de Toulouse](https://www.geofabrik.de/data/shapefiles_toulouse.zip), que ocupan unos 80Mb en Shapefile. Estos datos son cargados en PostGIS y se crean dos capas en GeoServer, una que accede al shapefile llamada `toulouse_shp` y otra que accede a la tabla en PostGIS llamada `toulouse_postgis`.
 
-Para que el uso de PostGIS tenga sentido, es necesaria la creación de índices tanto en la clave primaria como en la columna geométrica. Por tanto, tras realizar la carga:
+Para que el uso de PostGIS tenga sentido, es necesaria la creación de índices tanto en la clave primaria como en la columna geométrica. Los índices espaciales nos permitirán mejorar la eficiencia de las consultas mediante el uso del operador caja de PostGIS. Como se puede ver en la imagen a continuación, para que la consulta sea más efectiva, si buscamos los objetos que intersectan a la estrella amarilla, usando las cajas que encierran los elementos podremos descartar ciertos elementos de los que observamos que ni siquiera sus cajas se intersectan.
+
+![](_images/vector/bbox.png)
+
+Por tanto, tras realizar la carga:
 
 	USER=portal_admin
 	DB=portal
@@ -29,7 +25,7 @@ ejecutaremos los siguientes comandos:
 	psql -U $USER -d $DB -c "create index toulouse_geom_gix ON gis.toulouse using gist(geom)"
 	psql -U $USER -d $DB -c "vacuum analyze gis.toulouse"
 
-Para Shapefile también estamos utilizando un índice pero éste lo crea automáticamente GeoServer... si el usuario `Tomcat7`, que ejecuta GeoServer, tiene permisos para acceder al directorio. En caso de tener problemas de rendimiento con un Shapefile es conveniente revisar el log de GeoServer en busca de algo similar a esto:
+Para Shapefile también estamos utilizando un índice pero éste lo crea automáticamente GeoServer, si el usuario `Tomcat7`, que ejecuta GeoServer, tiene permisos para acceder al directorio. En caso de tener problemas de rendimiento con un Shapefile es conveniente revisar el log de GeoServer en busca de algo similar a esto:
 
 	14 oct 05:11:52 ERROR [data.shapefile] - /var/geoserver/shapefiles/gis.osm_buildings_v06.qix (Permiso denegado)
 	java.io.FileNotFoundException: /var/geoserver/shapefiles/gis.osm_buildings_v06.qix (Permiso denegado)
