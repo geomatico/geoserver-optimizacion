@@ -126,6 +126,8 @@ Se aplica la misma prueba que se aplicó al shapefile: 240 peticiones en 1m40s. 
 
 ![](_images/styles/pg-full-concurrent.png)
 
+### Muestras aleatorias
 
- 
+Para muestras aleatorias, usando el mismo procedimiento que en el caso anterior, obtenemos el siguiente resultado:
 
+![](_images/postgis_estilos_aleatorio.png)
