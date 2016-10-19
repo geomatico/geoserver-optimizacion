@@ -106,7 +106,7 @@ Podemos observar que el shapefile es 10 veces más eficiente que la base de dato
 
 Se puede jugar con el parámetro `fetch_size` del datastore para aumentar el número de registros que se recuperan en una conexión pero esto sólo tiene sentido cuando el servidor de mapas y de base de datos tienen una latencia importante entre ellos. En general la dirección que se debe de tomar es la opuesta: en lugar de aumentar el buffer de lectura con la base de datos se debe reducir la cantidad de elementos que se leen, como veremos en el apartado de estilos.
 
-**Shapefile**
+#### Shapefile
 
 * *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
 * *Puerto*: 8080
@@ -114,7 +114,7 @@ Se puede jugar con el parámetro `fetch_size` del datastore para aumentar el nú
 
 ![](_images/vector/shp-full-sequential.png)
 
-**PostGIS**
+#### PostGIS
 
 * *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
 * *Puerto*: 8080
@@ -122,7 +122,7 @@ Se puede jugar con el parámetro `fetch_size` del datastore para aumentar el nú
 
 ![](_images/vector/pg-full-sequential.png)
 
-**Concurrencia en shapefile**
+#### Concurrencia en shapefile
 
 Sin embargo el tiempo de respuesta, incluso con Shapefile es inaceptable para un servidor que vaya a tener un uso intensivo. La siguiente imagen muestra los resultados haciendo 240 peticiones en 1m40s.
 
@@ -134,7 +134,7 @@ Vemos ahora que el rendimiento es mucho mejor ya que en ambos formatos se filtra
 
 Se lanzan 240 peticiones en 30 segundos y no se produce ningún colapso en el servidor, ya que las peticiones se resuelven instantáneamente. PostGIS sigue funcionando más lento pero ya a un nivel casi inapreciable.
 
-**Shapefile**
+#### Shapefile
 
 * *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
 * *Puerto*: 8080
@@ -142,7 +142,7 @@ Se lanzan 240 peticiones en 30 segundos y no se produce ningún colapso en el se
 
 ![](_images/vector/shp-small-sequential.png)
 
-**PostGIS**
+#### PostGIS
 
 * *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
 * *Puerto*: 8080
@@ -150,6 +150,55 @@ Se lanzan 240 peticiones en 30 segundos y no se produce ningún colapso en el se
 
 ![](_images/vector/pg-small-sequential.png)
 
+### Extension aleatoria
 
+Hasta ahora hemos realizado las pruebas con extensión total o con una extensión pequeña determinada. Esto no se corresponde exactamente con la realidad, mas hayá de que queramos comprobar la carga del inicio de nuestro portal, unico momento en el que controlamos la extensión, ya que en el momento que el usuario empiece a navegar por nuestros mapas, las extensiones serán definidas por él.
 
+Para emular esto, JMeter dispone de una utilidad que nos permite cargar datos desde un [archivo CSV](_data/bboxs.csv). Como lo que variará en las peticiones será el BBOX de la misma, lo que haremos será extraer un número de BBOX's desde una [aplicación desarrollada para tal uso](http://michogarcia.org/bboxs2jmeter/) que nos generará un número determinado de BBOX's. Estos los guardaremos en un archivo CSV y configuraremos JMeter para poder extraer de este archivo los BBOX's.
 
+#### Configurando JMeter para obtener extensiones aleatorias
+A partir del plan de pruebas que tenemos definido, lo que haremos será añadir una *Configuración del CSV Dataset* a partir de botón derecho sobre la *Petición HTTP*, *Añadir*, *Elemento de Configuración* y *Configuración del CSV Dataset*.
+
+![](_images/configuracion_csv.png)
+
+Los datos que deberemos incluir serán:
+
+* Nombre del Archivo: con la ruta completa al archivo
+* Nombres de variables: bbox
+* Delimitador: por ejemplo **;** ya que en este caso solo habrá una variable en el CSV
+
+Ahora deberemos configurar la *Peticion HTTP* para que utilice el BBOX desde el CSV. Para ello,
+
+![](_images/http_bbox.png)
+
+en la pestaña de **Parameters**, añadiremos un registro pulsando sobre *Añadir* e introduciendo:
+
+* Nombre: **bbox** (el nombre que usará en la URL)
+* Valor: ${bbox} (el nombre que le hemos dado en la Configuración Anterior)
+* Codificar: true
+
+Ahora deberemos elimiar el bbox de la ruta, y si realizamos las peticiones, comprobaremos que esta tomando el valor del BBOX del CSV, y que está realizando peticiones con diferentes extensiones:
+
+![](_images/unapeticion.png)
+
+o por ejemplo,
+
+![](_images/otrapeticion.png)
+
+Utilizando este método, tendremos para:
+
+#### PostGIS
+
+* *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
+* *Puerto*: 8080
+* *Ruta*: /geoserver/unredd/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&STYLES&LAYERS=unredd%3Atoulouse_postgis&SRS=EPSG%3A4326&WIDTH=768&HEIGHT=476
+
+![](_images/postgis_multiple_zooms.png)
+
+#### Shapefile
+
+* *Nombre o Servidor o IP*: url del servidor, en nuestro caso **192.168.0.12**
+* *Puerto*: 8080
+* *Ruta*: /geoserver/unredd/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&STYLES&LAYERS=unredd%3Atoulouse_shape&SRS=EPSG%3A4326&WIDTH=768&HEIGHT=476
+
+![](_images/shape_multiple_zooms.png)
